@@ -1,7 +1,7 @@
 # WORK IN PROGRESS
 
 
-End-to-end code for predicting Curie temp. and other magnetic properties of 2D materials. Re-optimied for Quantum Espresso (QE)
+End-to-end code for predicting Curie temp. and other magnetic properties of 2D materials. Re-optimized for Quantum Espresso (QE)
 
 The code needs Python > 3.6 to run. The following libraries are required all of which can be installed using pip. These packages in turn have their own dependencies which would be installed automatically.
 
