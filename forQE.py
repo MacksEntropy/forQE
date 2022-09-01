@@ -2,9 +2,9 @@
 
 from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Element
-from pymatgen.core.analysis.magnetism.analyzer import MagneticStructureEnumerator, CollinearMagneticStructureAnalyzer
-from pymatgen.core.io import pwscf
-from pymatgen.core.command_line.bader_caller import bader_analysis_from_objects
+from pymatgen.analysis.magnetism.analyzer import MagneticStructureEnumerator, CollinearMagneticStructureAnalyzer
+from pymatgen.io import pwscf
+from pymatgen.command_line.bader_caller import bader_analysis_from_objects
 import sys
 import os
 from shutil import copyfile
