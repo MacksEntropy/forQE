@@ -1,10 +1,10 @@
-'''#!/home/magtest/test_env/bin/python'''
+#!/home/magtest/test_env/bin/python
 
 from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Element
 from pymatgen.analysis.magnetism.analyzer import MagneticStructureEnumerator, CollinearMagneticStructureAnalyzer
-from pymatgen.io import pwscf
-from pymatgen.command_line.bader_caller import bader_analysis_from_objects
+# from pymatgen.io import pwscf
+# from pymatgen.command_line.bader_caller import bader_analysis_from_objects
 import sys
 import os
 from shutil import copyfile
@@ -17,7 +17,7 @@ import numpy as np
 from sympy import Symbol, linsolve
 from itertools import combinations
 import math
-from numba import jit, cuda
+# from numba import jit, cuda
 from pickle import load, dump
 
 
@@ -147,32 +147,32 @@ def Nfinder(struct_mag,site,d_N,dr):
     return candidates
 
 
-@cuda.jit
-def my_kernel(all_coords,coord_N,index):
-    """
-    Code for kernel.
-    """
-    pos = cuda.grid(1)
-    if pos < all_coords.size:
-        if math.sqrt((all_coords[pos]-coord_N[0])**2 + (all_coords[pos+1]-coord_N[1])**2 + (all_coords[pos+2]-coord_N[2])**2) < 0.01:
-            index[0] = pos/3
+# @cuda.jit
+# def my_kernel(all_coords,coord_N,index):
+#     """
+#     Code for kernel.
+#     """
+#     pos = cuda.grid(1)
+#     if pos < all_coords.size:
+#         if math.sqrt((all_coords[pos]-coord_N[0])**2 + (all_coords[pos+1]-coord_N[1])**2 + (all_coords[pos+2]-coord_N[2])**2) < 0.01:
+#             index[0] = pos/3
 
 
-def NfinderGPU(struc_mag,site, d_N, dr):
-    coord_site = struc_mag.cart_coords[site]
-    Ns = struc_mag.get_neighbors_in_shell(coord_site,d_N,dr)
-    #print(Ns)
-    Ns_wrapped = Ns[:]
-    candidates = Ns[:]
-    for i in range(len(Ns)):
-        Ns_wrapped[i] = Ns[i][0].to_unit_cell()
-        coord_N = np.array([Ns_wrapped[i].x,Ns_wrapped[i].y,Ns_wrapped[i].z],dtype='float32')
-        index = np.array([-5])
-        threadsperblock = 480
-        blockspergrid = math.ceil(all_coords.shape[0] / threadsperblock)
-        my_kernel[blockspergrid,threadsperblock](all_coords,coord_N,index)
-        candidates[i]=index[0]
-    return candidates
+# def NfinderGPU(struc_mag,site, d_N, dr):
+#     coord_site = struc_mag.cart_coords[site]
+#     Ns = struc_mag.get_neighbors_in_shell(coord_site,d_N,dr)
+#     #print(Ns)
+#     Ns_wrapped = Ns[:]
+#     candidates = Ns[:]
+#     for i in range(len(Ns)):
+#         Ns_wrapped[i] = Ns[i][0].to_unit_cell()
+#         coord_N = np.array([Ns_wrapped[i].x,Ns_wrapped[i].y,Ns_wrapped[i].z],dtype='float32')
+#         index = np.array([-5])
+#         threadsperblock = 480
+#         blockspergrid = math.ceil(all_coords.shape[0] / threadsperblock)
+#         my_kernel[blockspergrid,threadsperblock](all_coords,coord_N,index)
+#         candidates[i]=index[0]
+#     return candidates
 
 
 def find_max_len(lst): 
@@ -193,79 +193,79 @@ def make_homogenous(lst):
         print(str(i)+'p / '+str(len(lst)-1))
 
 
-@jit(nopython=True)
-def tFunc(spin_abs,spin_x,spin_y,spin_z,mags,magsqs,T,J2flag,J3flag,J4flag,J5flag):
-    for t in range(trange):
-        mag = 0
+# @jit(nopython=True)
+# def tFunc(spin_abs,spin_x,spin_y,spin_z,mags,magsqs,T,J2flag,J3flag,J4flag,J5flag):
+#     for t in range(trange):
+#         mag = 0
         
-        for i in range(N):
-            site = np.random.randint(0,N)
-            N1s = N1list[site]
-            N2s = N2list[site]
-            N3s = N3list[site]
-            N4s = N4list[site]
-            N5s = N5list[site]            
+#         for i in range(N):
+#             site = np.random.randint(0,N)
+#             N1s = N1list[site]
+#             N2s = N2list[site]
+#             N3s = N3list[site]
+#             N4s = N4list[site]
+#             N5s = N5list[site]            
             
-            S_current = np.array([spin_x[site],spin_y[site],spin_z[site]])
-            u, v = np.random.random(),np.random.random()
-            phi = 2*np.pi*u
-            theta = np.arccos(2*v-1)
-            S_x = spin_abs[site]*np.sin(theta)*np.cos(phi)
-            S_y = spin_abs[site]*np.sin(theta)*np.sin(phi)
-            S_z = spin_abs[site]*np.cos(theta)
-            S_after = np.array([S_x,S_y,S_z])
-            E_current = 0
-            E_after = 0
+#             S_current = np.array([spin_x[site],spin_y[site],spin_z[site]])
+#             u, v = np.random.random(),np.random.random()
+#             phi = 2*np.pi*u
+#             theta = np.arccos(2*v-1)
+#             S_x = spin_abs[site]*np.sin(theta)*np.cos(phi)
+#             S_y = spin_abs[site]*np.sin(theta)*np.sin(phi)
+#             S_z = spin_abs[site]*np.cos(theta)
+#             S_after = np.array([S_x,S_y,S_z])
+#             E_current = 0
+#             E_after = 0
             
-            for N1 in N1s:
-                if N1!=100000 or N1!=-5:
-                    S_N1 = np.array([spin_x[N1],spin_y[N1],spin_z[N1]])
-                    E_current += -J1*np.dot(S_current,S_N1)
-                    E_after += -J1*np.dot(S_after,S_N1)
-            if J2flag:
-                for N2 in N2s:
-                    if N2!=100000 or N2!=-5:
-                        S_N2 = np.array([spin_x[N2],spin_y[N2],spin_z[N2]])
-                        E_current += -J2*np.dot(S_current,S_N2)
-                        E_after += -J2*np.dot(S_after,S_N2)
-            if J3flag: 
-                for N3 in N3s:
-                    if N3!= 100000 or N3!=-5:
-                        S_N3 = np.array([spin_x[N3],spin_y[N3],spin_z[N3]])
-                        E_current += -J3*np.dot(S_current,S_N3)
-                        E_after += -J3*np.dot(S_after,S_N3)
-            if J4flag: 
-                for N4 in N4s:
-                    if N4!= 100000 or N4!=-5:
-                        S_N4 = np.array([spin_x[N4],spin_y[N4],spin_z[N4]])
-                        E_current += -J4*np.dot(S_current,S_N4)
-                        E_after += -J4*np.dot(S_after,S_N4)
-            if J5flag: 
-                for N5 in N5s:
-                    if N5!= 100000 or N5!=-5:
-                        S_N5 = np.array([spin_x[N5],spin_y[N5],spin_z[N5]])
-                        E_current += -J5*np.dot(S_current,S_N5)
-                        E_after += -J5*np.dot(S_after,S_N5)
+#             for N1 in N1s:
+#                 if N1!=100000 or N1!=-5:
+#                     S_N1 = np.array([spin_x[N1],spin_y[N1],spin_z[N1]])
+#                     E_current += -J1*np.dot(S_current,S_N1)
+#                     E_after += -J1*np.dot(S_after,S_N1)
+#             if J2flag:
+#                 for N2 in N2s:
+#                     if N2!=100000 or N2!=-5:
+#                         S_N2 = np.array([spin_x[N2],spin_y[N2],spin_z[N2]])
+#                         E_current += -J2*np.dot(S_current,S_N2)
+#                         E_after += -J2*np.dot(S_after,S_N2)
+#             if J3flag: 
+#                 for N3 in N3s:
+#                     if N3!= 100000 or N3!=-5:
+#                         S_N3 = np.array([spin_x[N3],spin_y[N3],spin_z[N3]])
+#                         E_current += -J3*np.dot(S_current,S_N3)
+#                         E_after += -J3*np.dot(S_after,S_N3)
+#             if J4flag: 
+#                 for N4 in N4s:
+#                     if N4!= 100000 or N4!=-5:
+#                         S_N4 = np.array([spin_x[N4],spin_y[N4],spin_z[N4]])
+#                         E_current += -J4*np.dot(S_current,S_N4)
+#                         E_after += -J4*np.dot(S_after,S_N4)
+#             if J5flag: 
+#                 for N5 in N5s:
+#                     if N5!= 100000 or N5!=-5:
+#                         S_N5 = np.array([spin_x[N5],spin_y[N5],spin_z[N5]])
+#                         E_current += -J5*np.dot(S_current,S_N5)
+#                         E_after += -J5*np.dot(S_after,S_N5)
                                 
-            E_current += k_x*np.square(S_current[0]) + k_y*np.square(S_current[1]) + k_z*np.square(S_current[2])
-            E_after += k_x*np.square(S_x) + k_y*np.square(S_y) + k_z*np.square(S_z)
-            del_E = E_after-E_current
+#             E_current += k_x*np.square(S_current[0]) + k_y*np.square(S_current[1]) + k_z*np.square(S_current[2])
+#             E_after += k_x*np.square(S_x) + k_y*np.square(S_y) + k_z*np.square(S_z)
+#             del_E = E_after-E_current
                     
-            if del_E < 0:
-                spin_x[site],spin_y[site],spin_z[site] = S_x,S_y,S_z
-            else:
-                samp = np.random.random()
-                if samp <= np.exp(-del_E/(kB*T)):
-                    spin_x[site],spin_y[site],spin_z[site] = S_x,S_y,S_z
+#             if del_E < 0:
+#                 spin_x[site],spin_y[site],spin_z[site] = S_x,S_y,S_z
+#             else:
+#                 samp = np.random.random()
+#                 if samp <= np.exp(-del_E/(kB*T)):
+#                     spin_x[site],spin_y[site],spin_z[site] = S_x,S_y,S_z
                         
                         
-        if t>=threshold:
-            mag_vec = 2*np.array([np.sum(spin_x),np.sum(spin_y),np.sum(spin_z)])
-            mag = np.linalg.norm(mag_vec)
-            mags[t-threshold]=np.abs(mag)
-            magsqs[t-threshold]=np.square(mag)
+#         if t>=threshold:
+#             mag_vec = 2*np.array([np.sum(spin_x),np.sum(spin_y),np.sum(spin_z)])
+#             mag = np.linalg.norm(mag_vec)
+#             mags[t-threshold]=np.abs(mag)
+#             magsqs[t-threshold]=np.square(mag)
             
-    return np.mean(mags),np.mean(magsqs)
+#     return np.mean(mags),np.mean(magsqs)
 
 
 # main code
@@ -297,7 +297,7 @@ for i in range(len(cell)):
 cell.center(12.75,2)
 write('2D.xsf', sort(cell))
 
-struct = Structure.from_file('2D.xsf')  
+struct = Structure.from_file(cell)  
 mag_enum = MagneticStructureEnumerator(struct,transformation_kwargs={'symm_prec':mag_prec,'enum_precision_parameter':enum_prec})
 mag_structs = []
 
