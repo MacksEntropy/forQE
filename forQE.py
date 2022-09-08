@@ -3,8 +3,10 @@
 from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Element
 from pymatgen.analysis.magnetism.analyzer import MagneticStructureEnumerator, CollinearMagneticStructureAnalyzer
+from pymatgen.io.vasp.outputs import Vasprun, Chgcar, Oszicar, Outcar, Potcar
+from pymatgen.io.vasp.sets import MPRelaxSet, MPStaticSet, MPSOCSet
 # from pymatgen.io import pwscf
-# from pymatgen.command_line.bader_caller import bader_analysis_from_objects
+from pymatgen.command_line.bader_caller import bader_analysis_from_objects
 import sys
 import os
 from shutil import copyfile
@@ -17,7 +19,7 @@ import numpy as np
 from sympy import Symbol, linsolve
 from itertools import combinations
 import math
-# from numba import jit, cuda
+from numba import jit, cuda
 from pickle import load, dump
 
 
@@ -367,40 +369,40 @@ if acc == 'high':
 
 
 # start_time_dft = time()
-# for i in range(num_struct):
+for i in range(num_struct):
     
-#     struct_current = mag_structs[i].get_sorted_structure()
-#     mag_tot = 0
-#     for j in range(len(struct_current)):
-#         element = struct_current[j].specie.element
-#         if element in magnetic_list:
-#             try:
-#                 mag_tot += struct_current[j].specie.spin
-#             except Exception:
-#                 msg = '** the structure '+str(i)+' has uneven spins, continuing without it'
-#                 print(msg)
-#                 writeLog(msg)
-#                 mag_tot = 1000
-#                 break
+    struct_current = mag_structs[i].get_sorted_structure()
+    mag_tot = 0
+    for j in range(len(struct_current)):
+        element = struct_current[j].specie.element
+        if element in magnetic_list:
+            try:
+                mag_tot += struct_current[j].specie.spin
+            except Exception:
+                msg = '** the structure '+str(i)+' has uneven spins, continuing without it'
+                print(msg)
+                writeLog(msg)
+                mag_tot = 1000
+                break
 
-#     if i>0 and np.abs(mag_tot) > 0.1:
-#         msg = '** the structure '+str(i)+' seems ferrimagnetic, continuing without it'
-#         print(msg)
-#         writeLog(msg)
-#         continue
+    if i>0 and np.abs(mag_tot) > 0.1:
+        msg = '** the structure '+str(i)+' seems ferrimagnetic, continuing without it'
+        print(msg)
+        writeLog(msg)
+        continue
 
-#     submission = 0
-#     p = 0
-#     relx_path = root_path+'/config_'+str(i)+'/relx'
+    submission = 0
+    p = 0
+    relx_path = root_path+'/config_'+str(i)+'/relx'
     
-#     n = len(struct_current)
-#     spins = [0]*n
-#     for j in range(n):
-#         try:
-#             spins[j] = struct_current.species[j].spin
-#         except Exception:
-#             spins[j] = 0.0
-#     factor = float(lcm_atoms)/n
+    n = len(struct_current)
+    spins = [0]*n
+    for j in range(n):
+        try:
+            spins[j] = struct_current.species[j].spin
+        except Exception:
+            spins[j] = 0.0
+    factor = float(lcm_atoms)/n
     
 #     if acc == 'high':
 #         relx = MPRelaxSet(struct_current,user_incar_settings=relx_dict,user_kpoints_settings={'reciprocal_density':300},force_gamma=True,user_potcar_functional=xc)
