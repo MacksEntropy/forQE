@@ -34,9 +34,9 @@ enum_prec = 0.001
 max_neigh = 5
 GPU_accel = False
 padding = True
-# nsim = 4
-# kpar = 2
-# ncore = 1
+nsim = 4
+kpar = 2
+ncore = 1
 d_thresh = 0.05
 acc = 'default'
 LDAUJ_povided = {}
@@ -297,7 +297,7 @@ for i in range(len(cell)):
 cell.center(12.75,2)
 write('2D.xsf', sort(cell))
 
-struct = Structure.from_file(cell)  
+struct = Structure.from_file('2D.xsf')  
 mag_enum = MagneticStructureEnumerator(struct,transformation_kwargs={'symm_prec':mag_prec,'enum_precision_parameter':enum_prec})
 mag_structs = []
 
