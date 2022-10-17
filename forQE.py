@@ -18,7 +18,7 @@ import numpy as np
 from sympy import Symbol, linsolve
 from itertools import combinations
 import math
-from numba import jit, cuda
+# from numba import jit, cuda
 from pickle import load, dump
 
 
@@ -148,7 +148,7 @@ def Nfinder(struct_mag,site,d_N,dr):
     return candidates
 
 
-@cuda.jit
+# @cuda.jit
 def my_kernel(all_coords,coord_N,index):
     """
     Code for kernel.
@@ -194,7 +194,7 @@ def make_homogenous(lst):
         print(str(i)+'p / '+str(len(lst)-1))
 
 
-@jit(nopython=True)
+# @jit(nopython=True)
 def tFunc(spin_abs,spin_x,spin_y,spin_z,mags,magsqs,T,J2flag,J3flag,J4flag,J5flag):
     for t in range(trange):
         mag = 0
